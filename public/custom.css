@@ -60,3 +60,13 @@ h1, h2 {
 img {
   width: 100%;
 }
+
+.small img {
+  width: 50%;
+}
+
+li h2 {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 20px 0;
+}
