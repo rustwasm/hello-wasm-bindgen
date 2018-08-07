@@ -1,0 +1,62 @@
+@import url('https://fonts.googleapis.com/css?family=Alfa+Slab+One|Fira+Sans:400,800');
+
+body {
+  font-family: 'Fira Sans', Helvetica, Arial, sans-serif;
+}
+
+h1, h2 {
+  font-weight: 400;
+  font-family: 'Alfa Slab One', serif;
+  margin: 0;
+  z-index: 999999;
+  position: relative;
+}
+
+.title h1 {
+  margin-top: 100px;
+}
+
+.subtitle {
+  margin: 0;
+  font-family: 'Fira Sans', Helvetica, Arial, sans-serif;
+  font-size: 3rem;
+  color: #454C52;
+}
+
+.slide-url {
+  top: 12px;
+  position: absolute;
+  right: 20px;
+}
+
+.center {
+  text-align: center;
+}
+
+.purple-text {
+  color: #6555EC;
+}
+
+.purple-fill {
+  background-color: #6555EC;
+}
+
+.yellow-text {
+  color: #F4DC38;
+}
+
+.yellow-fill {
+  background-color: #F4DC38;
+}
+
+.highlight {
+  height: 30px;
+  position: relative;
+  top: -30px;
+  left: -10px;
+  width: 120%;
+}
+
+img {
+  width: 100%;
+}
