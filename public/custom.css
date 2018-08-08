@@ -69,6 +69,10 @@ img {
   font-size: 3.5em;
 }
 
+.medium img {
+  width: 80%;
+}
+
 li h2, li h3, li h1 {
   display: inline-block;
   vertical-align: middle;

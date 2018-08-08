@@ -37,6 +37,16 @@ class: middle, center
 ---
 class: middle, center
 
+![german village](public/img/germanvillage.png)
+
+---
+class: middle, center
+
+![wasm spa](public/img/relaxingspa.png)
+
+---
+class: middle, center
+
 # `wasm-bindgen`
 .subtitle[Facilitating high-level interactions between wasm modules and JavaScript]
 
@@ -57,6 +67,7 @@ class: middle, left
 - ## What does `wasm-bindgen` do
 - ## WebAssembly: An Overview
 - ## Developer Workflow
+- ## `wasm-bindgen` Features
 - ## How does `wasm-bindgen` even
 
 ---
@@ -66,10 +77,11 @@ class: middle, center
 # does `wasm-bindgen` do
 
 ---
-class: middle, left
+class: middle, center
 
-- ## Create a wrapper module for the wasm code
-- ## Generate bindings for JS to communicate with wasm code
+## Create a wrapper JS module for the wasm code
+<br/>
+## Generate bindings for JS to communicate with wasm code
 
 ---
 class: middle, center
@@ -192,6 +204,22 @@ class: middle, center
 ---
 class: middle, center
 
+# Application Binary Interface (ABI)
+
+### An interface between two binary program modules; often, one of these modules is a library or operating system facility, and the other is a program that is being run by a user.
+
+---
+class: middle, center
+
+# `wasm` is the ABI of the Web...
+
+--
+
+# it's just not complete yet.
+
+---
+class: middle, center
+
 ![wasm to runtime](public/img/wasmtoruntime.png)
 
 ---
@@ -213,6 +241,15 @@ class: middle, center
 <br/>
 # Accessibility!
 
+---
+class: middle, center
+
+# .big[HOW]
+
+---
+class: middle, center
+
+![magic](public/img/magic.gif)
 
 ---
 class: middle, center
@@ -235,7 +272,63 @@ class: middle, center
 ---
 class: middle, center
 
+![wasmbindgenfull](public/img/wasmbindgenfull.png)
+
+---
+class: middle, center
+
+.tiny[![doctor](public/img/doctor.png)]
+# Use `wasm` to surgically replace hotpaths in JavaScript
+
+---
+class: middle, center
+
+![oxidizing source maps](public/img/oxidizingsourcemaps.png)
+
+---
+class: middle, center
+
+.medium[![scalajs map benchmark](public/img/scalajssourcebench.png)]
+
+---
+class: middle, center
+
+# .big[HOW?!]
+
+---
+class: middle, center
+
 ![workflow](public/img/lin_pipeline.png)
+
+---
+class: middle, left
+
+```rust
+//Cargo.toml
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+```
+
+```rust
+// lib.rs
+#![feature(use_extern_macros)]
+
+extern crate wasm_bindgen;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+extern {
+    fn alert(s: &str);
+}
+
+#[wasm_bindgen]
+pub fn greet(name: &str) {
+    alert(&format!("Hello, {}!", name));
+}
+```
 
 ---
 class: middle, center
@@ -247,13 +340,272 @@ class: middle, center
 ---
 class: middle, center
 
-# .big[HOW]
-# does `wasm-bindgen` even
+# `wasm-pack publish`
+<br/>
+![hello npm](public/img/hellonpm.png)
 
 ---
 class: middle, left
 
-# Foundations
+```json
+{
+  "scripts": {
+    "start": "webpack-dev-server"
+  },
+  "dependencies": {
+    "hello-wasm": "^6.6.6"
+  },
+  "devDependencies": {
+    "webpack": "^4.0.1",
+    "webpack-cli": "^2.0.10",
+    "webpack-dev-server": "^3.1.0"
+  }
+}
+```
+
+.center[
+  ![hello alert](public/img/helloalert.png)
+]
+
+---
+class: middle, center
+
+.tiny[![surprise](public/img/surprise.png)]
+.tiny[![gift](public/img/gift.png)]
+.tiny[![sparkles](public/img/sparkles.png)]
+
+# You shouldn't even have to know that you are using `wasm`
+
+---
+class: middle, center
+
+# .big[WHAT]
+# just happened
+
+---
+class: middle, center
+
+![files](public/img/files.png)
+
+---
+class: middle, center
+
+![how it works](public/img/howitworks.png)
+
+---
+class: middle, left
+
+# `#[wasm_bindgen]` attribute
+<br/>
+## Marks the interface touch points
+
+- ### Import JS Classes/Functions
+- ### Export Rust Classes/Functions
+
+---
+class: middle, left
+
+# The `wasm-bindgen` CLI
+<br/>
+## Use the attributes to generate JS bindings!
+
+---
+class: middle, center
+
+# .big[WHAT]
+# can I do
+
+---
+class: middle, left
+
+# Constructors
+### Rust Instantiating a JS Class
+
+```rust
+#[wasm_bindgen]
+extern {
+    type Shoes;
+
+    #[wasm_bindgen(constructor)]
+    fn new() -> Shoes;
+}
+```
+
+```rust
+// Become a cobbler; construct `new Shoes()`
+let shoes = Shoes::new();
+```
+
+---
+class: middle, left
+
+# Constructors
+### JS Instantiating a Rust Class
+
+```rust
+#[wasm_bindgen]
+pub struct Foo {
+    contents: u32,
+}
+
+#[wasm_bindgen]
+impl Foo {
+    #[wasm_bindgen(constructor)]
+    pub fn new() -> Foo {
+        Foo { contents: 0 }
+    }
+
+    pub fn get_contents(&self) -> u32 {
+        self.contents
+    }
+}
+```
+
+---
+class: middle, left
+
+# Constructors
+### JS Instantiating a Rust Class
+
+```js
+import { Foo } from './my_module';
+
+const f = new Foo();
+console.log(f.get_contents());
+```
+
+---
+class: middle, left
+
+# Methods
+## Rust using JS Classes' Methods
+
+```rust
+#[wasm_bindgen]
+extern {
+    type Set;
+
+    #[wasm_bindgen(method)]
+    fn has(this: &Set, element: &JsValue) -> bool;
+}
+```
+
+```rust
+let set: Set = ...;
+let elem: JsValue = ...;
+if set.has(&elem) {
+    ...
+}
+```
+
+---
+class: middle, left
+
+# Class Heirarchy
+## Rust understands JS `extends`
+
+```rust
+#[wasm_bindgen]
+extern {
+    type Foo;
+
+    #[wasm_bindgen(extends = Foo)]
+    type Bar;
+}
+
+let x: &Bar = ...;
+let y: &Foo = x.as_ref(); // zero cost cast
+```
+
+```rust
+impl From<Bar> for Foo { ... }
+impl AsRef<Foo> for Bar { ... }
+impl AsMut<Foo> for Bar { ... }
+```
+---
+class: middle, left
+
+# Class Heirarchy
+## Rust understands JS `extends`
+
+```rust
+#[wasm_bindgen]
+extern {
+    type Foo;
+
+    #[wasm_bindgen(extends = Foo)]
+    type Bar;
+
+    #[wasm_bindgen(extends = Foo, extends = Bar)]
+    type Baz;
+}
+
+let x: &Baz = ...;
+let y1: &Bar = x.as_ref();
+let y2: &Foo = x.as_ref();
+```
+---
+class: middle, center
+
+![inheritence](public/img/inheritence.png)
+
+---
+class: middle, center
+
+# `js-sys` and `web-sys`
+
+---
+class: middle, left
+
+# `js-sys`
+
+Provide raw bindings to all the global APIs guaranteed to exist in every JavaScript environment by the ECMAScript standard without writing the `#[wasm_bindgen]` imports by hand.
+
+```rust
+extern crate js_sys;
+extern crate wasm_bindgen;
+use wasm_bindgen::prelude::*;
+
+#[wasm_bindgen]
+pub fn timed(callback: &js_sys::Function) -> f64 {
+    let then = js_sys::Date::now();
+    callback.apply(JsValue::null(), &js_sys::Array::new()).unwrap();
+    let now = js_sys::Date::now();
+    now - then
+}
+```
+
+---
+class: middle, left
+
+# `web-sys`
+
+The web-sys crate provides raw bindings to all of the Web's APIs, and its source lives at wasm-bindgen/crates/web-sys.
+
+The web-sys crate is entirely mechanically generated inside build.rs using wasm-bindgen's WebIDL frontend and the WebIDL interface definitions for Web APIs.
+
+<br/>
+
+.center[
+  ## Web Interface Definition Language
+
+  https://heycam.github.io/webidl/
+]
+---
+class: middle, center
+
+# .big[HOW]
+# does `wasm-bindgen` even
+
+---
+class: middle, center
+
+![look inside](public/img/box.gif)
+
+---
+class: middle, left
+
+# Design Principles
 
 - ## ES6 Modules
 - ## Unintrusive
@@ -261,12 +613,31 @@ class: middle, left
 ---
 class: middle, center
 
-# JS Objects in Rust
+## How we shoehorn JS objects into a `u32` for `wasm` to use?
+<br/>
+
+![tight fit](public/img/tightfit.gif)
 
 ---
-class: middle, center
+class: middle, left
 
-The question here is how we shoehorn JS objects into a u32 for wasm to use. The current strategy for this approach is to maintain two module-local variables in the generated foo.js file: a stack and a heap.
+# .center[JS Objects in Rust]
+
+```rust
+pub struct JsValue {
+    idx: u32,
+}
+
+// "private" constructors
+
+impl Drop for JsValue {
+    fn drop(&mut self) {
+        unsafe {
+            __wbindgen_object_drop_ref(self.idx);
+        }
+    }
+}
+```
 
 ---
 class: middle, left
@@ -281,9 +652,9 @@ pub fn foo(a: &JsValue) {
 }
 ```
 
-Here we're using the special JsValue type from the wasm-bindgen library itself. Our exported function, foo, takes a reference to an object. This notably means that it can't persist the object past the lifetime of this function call.
+Here we're using the special `JsValue` type from the `wasm-bindgen` library itself. Our exported function, foo, takes a reference to an object. This notably means that it can't persist the object past the lifetime of this function call.
 
-Now what we actually want to generate is a JS module that looks like (in Typescript parlance)
+Now what we actually want to generate is a JS module that looks like (in Typescript parlance):
 
 ```ts
 // foo.d.ts
@@ -338,107 +709,32 @@ pub extern fn __wasm_bindgen_generated_foo(arg0: u32) {
 ```
 
 ---
-class: middle, left
+class: middle, center
 
-## Long-lived JS Objects: Slab
-
-```
-// foo.rs
-#[wasm_bindgen]
-pub fn foo(a: JsValue) {
-    // ...
-}
-```
-
-### *NOTE: the parameter type is missing the `&`
+![stressed](public/img/stressed.gif)
 
 ---
-class: middle, left
+class: middle, center
 
-## Long-lived JS Objects: Slab
+# The best part about `wasm-bindgen` is that you don't have to worry about how it works.
 
-```
-import * as wasm from './foo_bg'; // imports from wasm file
-
-const slab = [];
-let slab_next = 0;
-
-export function foo(arg0) {
-  const idx0 = addHeapObject(arg0);
-  wasm.foo(idx0);
-}
-
-export function __wbindgen_object_drop_ref(idx) {
-  let obj = slab[idx];
-  obj.cnt -= 1;
-  if (obj.cnt > 0)
-    return;
-  // If we hit 0 then free up our space in the slab
-  slab[idx] = slab_next;
-  slab_next = idx;
-}
-```
+--
+<br/>
+<br/>
+# It just does.
 
 ---
-class: middle, left
+class: middle, center
 
-## Long-lived JS Objects: Slab
+# Learn More!
+# [The `wasm-bindgen` Guide](https://rustwasm.github.io/wasm-bindgen/introduction.html)
 
-```
-function addHeapObject(obj) {
-  if (slab_next === slab.length)
-    slab.push(slab.length + 1);
-  const idx = slab_next;
-  const next = slab[idx];
-  slab_next = next;
-  slab[idx] = { obj, cnt: 1 };
-  return idx;
-}
-```
-
----
-class: middle, left
-
-# `js-sys` and `web-sys`
-
----
-class: middle, left
-
-# `js-sys`
-
-provides raw bindings to all the global APIs guaranteed to exist in every JavaScript environment by the ECMAScript standard
-without writing the #[wasm_bindgen] imports by hand.
-
-```
-extern crate js_sys;
-extern crate wasm_bindgen;
-use wasm_bindgen::prelude::*;
-
-#[wasm_bindgen]
-pub fn timed(callback: &js_sys::Function) -> f64 {
-    let then = js_sys::Date::now();
-    callback.apply(JsValue::null(), &js_sys::Array::new()).unwrap();
-    let now = js_sys::Date::now();
-    now - then
-}
-```
-
----
-class: middle, left
-
-# `web-sys`
-
-The web-sys crate provides raw bindings to all of the Web's APIs, and its source lives at wasm-bindgen/crates/web-sys.
-
-The web-sys crate is entirely mechanically generated inside build.rs using wasm-bindgen's WebIDL frontend and the WebIDL interface definitions for Web APIs.
-
-## Web Interface Definition Language
-
-https://heycam.github.io/webidl/
 ---
 class: middle, center
 
 # Thanks!
+
+@ag_dubs | [bit.ly/hello-wasm-bindgen](http://bit.ly/hello-wasm-bindgen)
     </textarea>
     <script src="public/remark.js" type="text/javascript"></script>
     <script type="text/javascript">
