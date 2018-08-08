@@ -12,10 +12,6 @@ h1, h2 {
   position: relative;
 }
 
-.title h1 {
-  margin-top: 100px;
-}
-
 .subtitle {
   margin: 0;
   font-family: 'Fira Sans', Helvetica, Arial, sans-serif;
@@ -65,8 +61,28 @@ img {
   width: 50%;
 }
 
-li h2 {
+.tiny img {
+  width: 25%;
+}
+
+.big {
+  font-size: 3.5em;
+}
+
+li h2, li h3, li h1 {
   display: inline-block;
   vertical-align: middle;
   margin: 20px 0;
+}
+
+li h3 {
+  margin: 5px 0;
+}
+
+ul {
+  margin-top: 40px;
+}
+
+.center {
+  text-align: center;
 }
